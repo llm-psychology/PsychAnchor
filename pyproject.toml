@@ -1,10 +1,12 @@
 [build-system]
-requires = ["setuptools>=69", "wheel"]
+requires = ["setuptools>=77", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "psychanchor"
 version = "0.1.0"
+license = "GPL-3.0-only"
+license-files = ["LICENSE", "NOTICE.md"]
 description = "Persona-conditioned memory and dialogue prototype"
 requires-python = ">=3.10"
 dependencies = ["personadough>=0.1,<0.2", "faiss-cpu>=1.8,<2", "numpy>=1.26,<3", "aiofiles>=23,<26"]
