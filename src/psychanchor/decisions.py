@@ -135,7 +135,7 @@ async def decide_action(agent, situation_context, *, rooms, connections, agents,
                 decision = json.loads(response)
                 # 產生精簡 10 字內獨白（根據行為與環境）
                 def _generate_short_monologue(a, d: Dict) -> str:
-                    # 多樣化短語，依狀態／行為與隨機性
+                    # 多樣化短語，依狀態/行為與隨機性
                     import random
                     if a.escaped:
                         # 已逃生仍可返回救援
