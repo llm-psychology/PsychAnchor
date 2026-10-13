@@ -31,7 +31,7 @@ def test_dynamic_prompt_selects_only_needed_templates():
 
 
 def test_save_and_reload_faiss(tmp_path, monkeypatch):
-    monkeypatch.setenv("PSYCHANCHOR_DATA_DIR", str(tmp_path))
+    monkeypatch.setenv("PSYCHANCHOR_DATA_DIR", str(tmp_path / "中文記憶庫"))
     obj = Interviewer()
     vectors = np.array([[0.0, 1.0]], dtype=np.float32)
     qa = [{"q":"question", "a":"answer"}]
@@ -42,3 +42,12 @@ def test_save_and_reload_faiss(tmp_path, monkeypatch):
         assert restored.ntotal == 1
         assert pairs == qa and docs == ["Q：question A：answer"]
     asyncio.run(run())
+
+
+def test_batch_interview_accepts_fenced_json_with_literal_newlines():
+    obj = Interviewer()
+    obj.full_chat_gpt_41 = AsyncMock(return_value='```json\n[{"問題":"question","回答":"first\nsecond"}]\n```')
+    questions = SimpleNamespace(get_all_questions=lambda: [SimpleNamespace(content="question")])
+    personas = SimpleNamespace(get_persona_by_id=lambda _: {"基本資料": {"姓名": "測試"}})
+    pairs = asyncio.run(obj.process_questions_in_batches(questions, personas, "test"))
+    assert pairs == [{"q": "question", "a": "first\nsecond"}]

@@ -87,7 +87,8 @@ class Interviewer(LLM_responder):
         os.makedirs(db_dir, exist_ok=True)
         
         # 儲存 FAISS index（包含所有向量資訊）
-        faiss.write_index(index, os.path.join(db_dir, "index.faiss"))
+        async with aiofiles.open(os.path.join(db_dir, "index.faiss"), "wb") as f:
+            await f.write(faiss.serialize_index(index).tobytes())
         
         # 儲存原始問答對
         async with aiofiles.open(os.path.join(db_dir, "qa_pairs.json"), "w", encoding="utf-8") as f:
@@ -107,7 +108,8 @@ class Interviewer(LLM_responder):
         db_dir = os.path.join(self.rag_data_dir, name)
         
         # 載入 FAISS index（包含所有向量資訊）
-        index = faiss.read_index(os.path.join(db_dir, "index.faiss"))
+        async with aiofiles.open(os.path.join(db_dir, "index.faiss"), "rb") as f:
+            index = faiss.deserialize_index(np.frombuffer(await f.read(), dtype=np.uint8).copy())
         
         # 載入原始問答對
         async with aiofiles.open(os.path.join(db_dir, "qa_pairs.json"), "r", encoding="utf-8") as f:
@@ -173,7 +175,7 @@ class Interviewer(LLM_responder):
                     answer = answer.strip().replace("【","").replace("【輸出】","").replace("】","").replace("[輸出]","").replace("輸出：", "")
                     
                     # 解析 JSON
-                    qa_list = json.loads(answer)
+                    qa_list = json.loads(answer.removeprefix("```json").removeprefix("```").removesuffix("```").strip(), strict=False)
                     
                     # 將解析後的問答對加入批次結果
                     for qa in qa_list:
@@ -248,7 +250,7 @@ class Interviewer(LLM_responder):
             try:
                 # 解析回答
                 answer = answer.strip().replace("【","").replace("【輸出】","").replace("】","").replace("[輸出]","").replace("輸出：", "")
-                qa_list = json.loads(answer)
+                qa_list = json.loads(answer.removeprefix("```json").removeprefix("```").removesuffix("```").strip(), strict=False)
                 current_answer = qa_list[0]["回答"]
                 qa_pairs[-1]["a"] = current_answer
                 print(f"回答：{current_answer}")
@@ -281,7 +283,7 @@ async def process_persona(persona, interviewer:Interviewer, qaloader:QaLoader, p
     # persona 是一整個一個人的json
     persona_id = persona['基本資料']['id']
     
-    if persona_id in existing_dbs:
+    if persona_id in existing_dbs and all(os.path.isfile(os.path.join(rag_data_dir, persona_id, filename)) for filename in ("index.faiss", "qa_pairs.json")):
         print(f"\n跳過角色 {persona_id}（資料庫已存在）")
         return
     
