@@ -17,7 +17,7 @@
 
 ## 安裝與使用
 
-先將 PersonaDough 與此 repo 放在相鄰資料夾。需要 Python 3.10+；完整取得方式見 [主導覽](https://github.com/llm-psychology/persona-platform)。
+先將 PersonaDough 與此 repo 放在相鄰資料夾。需要 Python 3.10+；完整取得方式見 [Phersu 主導覽](https://github.com/llm-psychology/Phersu)。
 
 ```powershell
 python -m pip install -e ../PersonaDough -e .
