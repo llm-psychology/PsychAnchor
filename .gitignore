@@ -12,3 +12,6 @@ output_internet/
 *.egg-info/
 build/
 dist/
+
+*.egg
+.eggs/
