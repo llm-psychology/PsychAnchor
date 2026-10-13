@@ -1,0 +1,17 @@
+__pycache__/
+*.py[cod]
+.venv*/
+.env
+data/
+humanoid/humanoid_database/
+conversation_history/
+unity_memory/
+simulation_results/
+output_internet/
+.pytest_cache/
+*.egg-info/
+build/
+dist/
+
+*.egg
+.eggs/
